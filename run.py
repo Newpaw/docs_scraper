@@ -128,7 +128,7 @@ def scrape_all_pages(driver: webdriver.Chrome, urls_to_visit: list, max_iteratio
 
     return data
 
-def create_pdf(json_data:json):
+def create_pdf(json_data:json, file_name:str = "scraped_data"):
     html_data = '<html><head><meta charset="UTF-8"></head><body>'
 
     for item in json_data:
@@ -144,13 +144,13 @@ def create_pdf(json_data:json):
             html_data += '<p>{}</p>'.format(p)
 
     html_data += '</body></html>'
-    pdfkit.from_string(html_data, 'scraped_data.pdf')
-    logging.info("PDF file created with name scraped_data.pdf.")
+    pdfkit.from_string(html_data, f'{file_name}.pdf')
+    logging.info(f"PDF file created with name {file_name}.pdf.")
 
-def create_json(data:List[str]):
-    with open('scraped_data.json', 'w', encoding='utf-8') as f:
+def create_json(data:List[str], file_name:str = "scraped_data"):
+    with open(f'{file_name}.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
-    logging.info("JSON file created with name scraped_data.json.")
+    logging.info(f"JSON file created with name {file_name}.json.")
 
 def main():
     """
@@ -171,12 +171,8 @@ def main():
     driver.quit()
     logging.info("Scraping completed!")
 
-    create_json(data)
-
-    with open('scraped_data.json') as json_file:
-        data_for_pdf = json.load(json_file)
-        # Create a new BeautifulSoup object
-    create_pdf(data_for_pdf)
+    create_json(data, "1")
+    create_pdf(data, "2")
 
 
 if __name__ == "__main__":
