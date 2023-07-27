@@ -1,6 +1,9 @@
 import json
 import logging
+import pdfkit
 
+from json2html import json2html
+from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -125,6 +128,29 @@ def scrape_all_pages(driver: webdriver.Chrome, urls_to_visit: list, max_iteratio
 
     return data
 
+def create_pdf(json_data:json):
+    html_data = '<html><head><meta charset="UTF-8"></head><body>'
+
+    for item in json_data:
+        html_data += '<h1>URL</h1>'
+        html_data += '<p>{}</p>'.format(item['url'])
+
+        for h in item['h1']:
+            html_data += '<h1>{}</h1>'.format(h)
+
+        text = item['text']
+        paragraphs = text.split('. ')
+        for p in paragraphs:
+            html_data += '<p>{}</p>'.format(p)
+
+    html_data += '</body></html>'
+    pdfkit.from_string(html_data, 'scraped_data.pdf')
+    logging.info("PDF file created with name scraped_data.pdf.")
+
+def create_json(data:List[str]):
+    with open('scraped_data.json', 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+    logging.info("JSON file created with name scraped_data.json.")
 
 def main():
     """
@@ -140,29 +166,17 @@ def main():
 
     logging.info(f"Starting scraping {len(urls_to_visit)} pages...")
 
-    data = scrape_all_pages(driver, urls_to_visit)
+    data = scrape_all_pages(driver, urls_to_visit, 2)
 
     driver.quit()
-
-    #pages = [
-    #    Page(
-    #        url=item["url"], 
-    #        h1=item["h1"], 
-    #        h2=item["h2"], 
-    #        h3=item["h3"], 
-    #        h4=item["h4"], 
-    #        h5=item["h5"], 
-    #        text=item["text"]
-    #    )
-    #    for item in data
-    #]
-    #for page in pages:
-    #    logging.info(page.url)
-
-    with open('scraped_data.json', 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
-
     logging.info("Scraping completed!")
+
+    create_json(data)
+
+    with open('scraped_data.json') as json_file:
+        data_for_pdf = json.load(json_file)
+        # Create a new BeautifulSoup object
+    create_pdf(data_for_pdf)
 
 
 if __name__ == "__main__":

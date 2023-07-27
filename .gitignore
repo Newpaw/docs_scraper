@@ -94,5 +94,6 @@ Thumbs.db
 *~
 
 
-#JSON
+#JSON and pdf
 *.json
+*.pdf

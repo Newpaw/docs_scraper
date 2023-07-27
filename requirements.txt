@@ -1,1 +1,5 @@
 selenium
+json2html
+pdfkit
+bs4
+wkhtmltopdf
