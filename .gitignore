@@ -92,3 +92,7 @@ Thumbs.db
 .idea/
 *.pyc
 *~
+
+
+#JSON
+*.json
