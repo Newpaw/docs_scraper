@@ -42,6 +42,7 @@ env/
 ENV/
 env.bak/
 env.bck/
+.env
 
 # Editor specific files
 *.sublime-project
