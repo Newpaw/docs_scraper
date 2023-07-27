@@ -12,12 +12,8 @@ from models import Page
 
 
 logging.basicConfig(
-    level=logging.INFO,  # Set the logging level to INFO (you can adjust as needed)
-    format="%(asctime)s [%(levelname)s]: %(message)s",  # Define the log message format
-    handlers=[
-        logging.StreamHandler(),  # Log messages will be printed to the console
-        logging.FileHandler("scraping.log")  # Log messages will be saved to a file
-    ]
+    level=logging.INFO, 
+    format="%(asctime)s [%(levelname)s]: %(message)s",
 )
 
 
@@ -45,7 +41,7 @@ def set_chrome_options() -> Options:
     return chrome_options
 
 
-def setup_webdriver():
+def setup_webdriver() -> webdriver.Chrome:
     """
     Set up the selenium webdriver.
     Returns:
@@ -119,7 +115,7 @@ def scrape_all_pages(driver: webdriver.Chrome, urls_to_visit: list, max_iteratio
 
     while urls_to_visit and (max_iterations is None or iterations < max_iterations):
         url = urls_to_visit.pop(0)  # Get the first URL to visit
-        if url not in visited_urls:  # If we have not visited it yet
+        if url not in visited_urls:  
             logging.info(f"Scraping URL {iterations + 1} of {total_urls}: {url}")
             visited_urls.add(url)  # Mark as visited
             data.append(scrape_page(driver, url))  # Scrape data
@@ -135,7 +131,7 @@ def main():
     Main function to execute the web scraping.
     """
     logging.info("Initializing the web scraper...")
-    driver = setup_webdriver()  # Initialize Selenium
+    driver = setup_webdriver()
 
     base_url = 'https://docs.mluvii.com'
     driver.get(base_url)
@@ -144,7 +140,7 @@ def main():
 
     logging.info(f"Starting scraping {len(urls_to_visit)} pages...")
 
-    data = scrape_all_pages(driver, urls_to_visit, 4)
+    data = scrape_all_pages(driver, urls_to_visit)
 
     driver.quit()
 
