@@ -1,0 +1,64 @@
+# Ignore files not needed in Docker container
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyc/
+*.pyo/
+*.pyd/
+
+# Compiled files
+*.class
+*.o
+*.dll
+*.exe
+*.out
+*.so
+*.pyc
+
+# Cache and logs
+.cache/
+*.log
+logs/
+log/
+*.swp
+*.swo
+
+# Temporary files
+*~
+*.tmp
+*.temp
+
+# System and IDE files
+.DS_Store
+desktop.ini
+thumbs.db
+
+# Editor specific files
+*.sublime-project
+*.sublime-workspace
+*.komodoproject
+*.komodotools
+*.kate-swp
+*.ycm_extra_conf.py
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Dependency directories
+node_modules/
+bower_components/
+
+# Compiled output for specific languages
+*.gem
+*.jar
+*.war
+*.ear
+*.rar
+*.tar.gz
+*.zip
+*.tar.bz2
+*.tgz
+*.gz
