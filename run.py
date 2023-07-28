@@ -53,6 +53,12 @@ def setup_webdriver(base_url: str) -> webdriver.Chrome:
     logging.info(f"Initializing and setup the web scraper for base url: {base_url}")
     driver = webdriver.Chrome(options=set_chrome_options())
     driver.get(base_url)
+
+    browser_name = driver.capabilities.get('browserName')
+    browser_version = driver.capabilities.get('version') if 'version' in driver.capabilities else driver.capabilities.get('browserVersion')
+
+    logging.info(f"WebDriver Information - Browser Name: {browser_name}, Browser Version: {browser_version}")
+
     return driver
 
 
