@@ -251,7 +251,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Web scraping program.')
     parser.add_argument('--base_url', type=str, default='https://docs.mluvii.com/', 
                         help='The base URL from where the links will be collected for scraping.')
-    parser.add_argument('--limit_of_pages', type=int, default=2, 
+    parser.add_argument('--limit_of_pages', type=int, default=None, 
                         help='The maximum number of pages to be scraped.')
 
     args = parser.parse_args()
