@@ -1,5 +1,6 @@
 import logging
 import pdfkit
+import time
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -53,11 +54,41 @@ def setup_webdriver(base_url: str) -> webdriver.Chrome:
 
 
 def get_links(driver: webdriver.Chrome, base_url: str, limit: int = None) -> List[str]:
+    """
+    Gather all unique links from a website that meet certain conditions.
+    
+    This function uses a Selenium WebDriver instance to navigate a website and collect
+    unique links. It first collects links from all 'nav' elements on the base_url page.
+    Then, it navigates to each of these links and gathers further links.
+    The function can be limited to a certain number of links.
+    Logs the number of links found every 15 seconds.
+    
+    Parameters
+    ----------
+    driver : webdriver.Chrome
+        A Selenium WebDriver instance.
+    base_url : str
+        The URL of the page from where to start gathering links.
+    limit : int, optional
+        The maximum number of links to gather. If None, gather all links (default is None).
+
+    Returns
+    -------
+    List[str]
+        A list of unique URLs gathered from the website.
+
+    Raises
+    ------
+    Exception
+        If there's an error navigating to a URL, an error message is logged and the
+        exception is raised.
+    """
     logging.info("Getting links...")
     links = set()
     nav_elements = driver.find_elements(By.TAG_NAME, "nav")
 
     primary_hrefs = []
+    start_time = time.time()
     for nav_elem in nav_elements:
         link_elems = nav_elem.find_elements(By.TAG_NAME, "a")
         for link_elem in link_elems:
@@ -66,6 +97,10 @@ def get_links(driver: webdriver.Chrome, base_url: str, limit: int = None) -> Lis
                 primary_hrefs.append(href)
                 if limit is not None and len(primary_hrefs) >= limit:
                     break
+            # Log the number of links every 15 seconds
+            if time.time() - start_time > 15:
+                logging.info(f"Found {len(links)} links so far.")
+                start_time = time.time()
         if limit is not None and len(primary_hrefs) >= limit:
             break
 
@@ -86,13 +121,15 @@ def get_links(driver: webdriver.Chrome, base_url: str, limit: int = None) -> Lis
                     links.add(further_href)
                     if limit is not None and len(links) >= limit:
                         break
+            # Log the number of links every 15 seconds
+            if time.time() - start_time > 15:
+                logging.info(f"Found {len(links)} links so far.")
+                start_time = time.time()
             if limit is not None and len(links) < limit:
                 driver.back()
         except Exception as e:
             logging.error(f"Error navigating to {href}: {e}")
     logging.info(f"Found {len(links)} links.")
-
-    return list(links)[:limit] if limit is not None else list(links)
 
 
 def scrape_page(driver: webdriver.Chrome, url: str) -> dict:
