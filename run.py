@@ -10,6 +10,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import TimeoutException
 
 import pdfkit
 
@@ -52,6 +53,7 @@ def setup_webdriver(base_url: str) -> webdriver.Chrome:
     """
     logging.info(f"Initializing and setup the web scraper for base url: {base_url}")
     driver = webdriver.Chrome(options=set_chrome_options())
+    driver.set_page_load_timeout(30)
     driver.get(base_url)
 
     browser_name = driver.capabilities.get('browserName')
@@ -106,7 +108,6 @@ def get_links(driver: webdriver.Chrome, base_url: str, limit: int = None) -> Lis
                 primary_hrefs.append(href)
                 if limit is not None and len(primary_hrefs) >= limit:
                     break
-            # Log the number of links every 15 seconds
             if time.time() - start_time > 15:
                 logging.info(f"Found {len(links)} links so far.")
                 start_time = time.time()
@@ -119,25 +120,26 @@ def get_links(driver: webdriver.Chrome, base_url: str, limit: int = None) -> Lis
             break
         try:
             driver.get(href)
-            further_elements = driver.find_elements(By.TAG_NAME, "a")
-            for further_elem in further_elements:
-                further_href = further_elem.get_attribute("href")
-                if (
-                    further_href
-                    and further_href.startswith(base_url)
-                    and "#" not in further_href
-                ):
-                    links.add(further_href)
-                    if limit is not None and len(links) >= limit:
-                        break
-            # Log the number of links every 15 seconds
-            if time.time() - start_time > 15:
-                logging.info(f"Found {len(links)} links so far.")
-                start_time = time.time()
-            if limit is not None and len(links) < limit:
-                driver.back()
-        except Exception as e:
-            logging.error(f"Error navigating to {href}: {e}")
+        except TimeoutException:
+            logging.error(f"Timeout occurred when loading page {href}, skipping this page.")
+            continue
+            
+        further_elements = driver.find_elements(By.TAG_NAME, "a")
+        for further_elem in further_elements:
+            further_href = further_elem.get_attribute("href")
+            if (
+                further_href
+                and further_href.startswith(base_url)
+                and "#" not in further_href
+            ):
+                links.add(further_href)
+                if limit is not None and len(links) >= limit:
+                    break
+        if time.time() - start_time > 15:
+            logging.info(f"Found {len(links)} links so far.")
+            start_time = time.time()
+        if limit is not None and len(links) < limit:
+            driver.back()
     logging.info(f"Found {len(links)} links.")
 
     return list(links)[:limit] if limit is not None else list(links)
