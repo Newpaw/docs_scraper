@@ -1,6 +1,7 @@
 import logging
 import pdfkit
 import time
+import os
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -131,6 +132,8 @@ def get_links(driver: webdriver.Chrome, base_url: str, limit: int = None) -> Lis
             logging.error(f"Error navigating to {href}: {e}")
     logging.info(f"Found {len(links)} links.")
 
+    return list(links)[:limit] if limit is not None else list(links)
+
 
 def scrape_page(driver: webdriver.Chrome, url: str) -> dict:
     logging.debug(f"Scraping URL: {url}")
@@ -144,19 +147,41 @@ def scrape_page(driver: webdriver.Chrome, url: str) -> dict:
     return data
 
 
-def create_pdf(data: List[dict], file_name: str = "scraped_data"):
+def create_pdf(data: List[dict]) -> str:
+    """
+    Creates a PDF document from the given data. The PDF file is named using
+    the current timestamp to ensure uniqueness.
+
+    Parameters
+    ----------
+    data : List[dict]
+        List of dictionaries containing URL and content.
+
+    Returns
+    -------
+    str
+        The absolute path of the created PDF document.
+    """
+    timestamp = time.strftime("%Y%m%d-%H%M%S")
+    unique_file_name = f"scraped_data_{timestamp}.pdf"
+    
     html_data = '<html><head><meta charset="UTF-8"></head><body>'
     for item in data:
         html_data += "<h1>URL: {}</h1>".format(item["url"])
         html_data += "<p>{}</p>".format(item["content"].replace("\n", "<br>"))
     html_data += "</body></html>"
-    pdfkit.from_string(html_data, f"{file_name}.pdf")
-    logging.info(f"PDF file created with name {file_name}.pdf.")
+
+    output_path = os.path.join(os.getcwd(), unique_file_name)
+    pdfkit.from_string(html_data, output_path)
+
+    logging.info(f"PDF file created at {output_path}.")
+
+    return output_path
 
 
 def main():
-    base_url = "https://docs.mluvii.com"
-    limit_of_pages = None
+    base_url:url = "https://portainer.gitbook.io/"
+    limit_of_pages:int = 2
 
     driver = setup_webdriver(base_url)
     urls_to_visit = get_links(driver, base_url, limit=limit_of_pages)
@@ -169,7 +194,7 @@ def main():
         logging.info(f"Scraped {i+1} from {number_of_pages} pages.")
 
     driver.quit()
-    create_pdf(data, "scraped_data")
+    create_pdf(data)
 
 
 if __name__ == "__main__":
